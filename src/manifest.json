@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "version": "0.0.1",
+  "name": "QuickOpen",
+  "description": "通过输入简写快速打开指定url标签页",
+  "options_page": "options.html",
+  "background": { "service_worker": "background.bundle.js" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon-34.png",
+    "default_title": "QuickOpen"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "icons": {
+    "128": "icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "<all_urls>"],
+      "js": ["contentScript.bundle.js"],
+      "css": ["content.styles.css"]
+    }
+  ],
+  "devtools_page": "devtools.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["content.styles.css", "icon-128.png", "icon-34.png"],
+      "matches": []
+    }
+  ],
+  "permissions":[
+    "tabs",
+    "storage"
+  ],
+  "commands":{
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+E",
+        "windows": "Ctrl+E",
+        "mac": "Command+E"
+      }
+    }
+  }
+}
