@@ -1,9 +1,7 @@
 import React from 'react';
 import {Space} from 'antd';
 import {CardData} from "../../components/CardData";
-
 import {CardUpload} from "../../components/CardUpload";
-import {CardData2} from "../../components/CardData2";
 
 const Options = () => {
     return (
@@ -18,7 +16,7 @@ const Options = () => {
                     margin: 15
                 }}
             >
-                <CardData2 />
+                <CardData />
                 <CardUpload />
             </Space>
 
