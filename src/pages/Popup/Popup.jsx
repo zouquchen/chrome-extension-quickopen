@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 
-import {AutoComplete, Input, Button, message, Card, Space} from 'antd';
+import {AutoComplete, Input, message, Card} from 'antd';
 import {createNewTab} from "../../functions/newTab";
-import {fuzzyMathByAbbr, getAllAbbr, getUrlByAbbr} from "../../functions/file";
+import {fuzzyMathByAbbr, getUrlByAbbr} from "../../functions/file";
 
 const Popup = () => {
   const onSearch = async(value, _e, info) => {
