@@ -1,9 +1,8 @@
 import React, {createRef, forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
-import {Card, Form, Input, InputNumber, Popconfirm, Table, Typography, Button, Modal} from 'antd';
-import {chromeStorageSyncSet, getAllValues} from "../functions/file";
+import {Card, Form, Input, InputNumber, Popconfirm, Table, Typography, Button, Modal, message} from 'antd';
+import {chromeStorageSyncSet, getAllValues, saveAbbrUrl} from "../functions/file";
 
 export const CardData = () => {
-	let ref = new createRef();
 	return (
 		<Card title="数据" extra={<AddPopup />}>
 			<DataTable/>
@@ -122,29 +121,26 @@ const DataTable = forwardRef(({}, ref) => {
 				let saveArray = [newDatum.abbr, newDatum.url]
 				saveData.push(saveArray)
 			}
-			chromeStorageSyncSet(saveData)
+			await chromeStorageSyncSet(saveData).then(
+				message.info("保存成功！", 3000)
+			)
 		} catch (errInfo) {
 			console.log('Validate Failed:', errInfo);
 		}
 	};
 	const handleDelete = async (key) => {
 		try {
-			const row = await form.validateFields();
 			const newData = [...data];
 			const index = newData.findIndex((item) => key === item.key);
-			if (index > -1) {
-				const item = newData[index];
-				newData.splice(index, 1, {
-					...item,
-					...row,
-				});
-				setData(newData);
-				setEditingKey('');
-			} else {
-				newData.push(row);
-				setData(newData);
-				setEditingKey('');
+			newData.splice(index, 1)
+			let saveData = []
+			for (const newDatum of newData) {
+				let saveArray = [newDatum.abbr, newDatum.url]
+				saveData.push(saveArray)
 			}
+			await chromeStorageSyncSet(saveData).then(
+				message.info("删除成功！", 3000)
+			)
 
 		} catch (errInfo) {
 			console.log('Validate Failed:', errInfo);
@@ -226,21 +222,35 @@ const DataTable = forwardRef(({}, ref) => {
 
 const AddPopup = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [url, setUrl] = useState()
+	const [abbr, setAbbr] = useState()
+
 	const showModal = () => {
 		setIsModalOpen(true);
 	};
 	const handleOk = () => {
 		setIsModalOpen(false);
+		saveAbbrUrl(abbr, url).then(
+			message.info("新增成功！")
+		)
+		setUrl(null)
+		setAbbr(null)
 	};
 	const handleCancel = () => {
 		setIsModalOpen(false);
 	};
 	const onFinish = (values) => {
-		console.log('Success:', values);
+		// console.log('Success:', values);
 	};
 	const onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
+		// console.log('Failed:', errorInfo);
 	};
+	const dealChangeUrl = (event) => {
+		setUrl(event.target.value)
+	}
+	const dealChangeAbbr = (event) => {
+		setAbbr(event.target.value)
+	}
 	return (
 		<>
 			<Button type="primary" onClick={showModal} >
@@ -275,7 +285,7 @@ const AddPopup = () => {
 							},
 						]}
 					>
-						<Input />
+						<Input onChange={dealChangeAbbr}/>
 					</Form.Item>
 
 					<Form.Item
@@ -288,23 +298,8 @@ const AddPopup = () => {
 							},
 						]}
 					>
-						<Input />
+						<Input onChange={dealChangeUrl}/>
 					</Form.Item>
-
-					{/*<Form.Item*/}
-					{/*	wrapperCol={{*/}
-					{/*		offset: 16,*/}
-					{/*		span: 16,*/}
-					{/*	}}*/}
-					{/*>*/}
-					{/*	<Button htmlType="cancel">*/}
-					{/*		取消*/}
-					{/*	</Button>*/}
-
-					{/*	<Button type="primary" htmlType="submit">*/}
-					{/*		新增*/}
-					{/*	</Button>*/}
-					{/*</Form.Item>*/}
 				</Form>
 			</Modal>
 		</>
