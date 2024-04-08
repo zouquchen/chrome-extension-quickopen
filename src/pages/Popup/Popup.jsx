@@ -31,7 +31,7 @@ const Popup = () => {
   return (
       <Card title="Quick Open" extra={<a target="_blank" href="/options.html">配置</a>} style={{ width: 300 }}>
         <AutoComplete
-          popupMatchSelectWidth={5}
+          popupMatchSelectWidth={252}
           options={options}
           onSelect={onSelect}
           onSearch={handleSearch}
