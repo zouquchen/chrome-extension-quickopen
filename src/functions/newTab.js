@@ -1,5 +1,3 @@
-import {getUrlByAbbr} from "./file";
-import { Button, message, Space } from 'antd';
 
 /**
  * 打开新标签页

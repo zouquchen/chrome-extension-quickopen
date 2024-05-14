@@ -1,81 +1,35 @@
 import React, {createRef, forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
 import {Card, Form, Input, InputNumber, Popconfirm, Table, Typography, Button, Modal, message} from 'antd';
-import {chromeStorageSyncSet, getAllValues, saveAbbrUrl} from "../functions/file";
+import {chromeStorageSyncSet, saveAbbrUrl} from "../functions/file";
+import {getAllData} from "../functions/data";
 
 export const CardData = () => {
+	const [data, setData] = useState([]);
+
 	return (
-		<Card title="数据" extra={<AddPopup />}>
-			<DataTable/>
+		<Card title="数据" extra={<AddPopup data={data} setData={setData}/>}>
+			<DataTable data={data} setData={setData}/>
 		</Card>
 	)
 }
 
-const EditableCell = ({
-	                      editing,
-	                      dataIndex,
-	                      title,
-	                      inputType,
-	                      record,
-	                      index,
-	                      children,
-	                      ...restProps
-                      }) => {
-	const inputNode = inputType === 'number' ? <InputNumber/> : <Input/>;
-	return (
-		<td {...restProps}>
-			{editing ? (
-				<Form.Item name={dataIndex}
-					rules={[
-						{
-							required: true,
-							message: `Please Input ${title}!`,
-						},
-					]}
-				>
-					{inputNode}
-				</Form.Item>
-			) : (
-				children
-			)}
-		</td>
-	);
-};
-
-
-
-const DataTable = forwardRef(({}, ref) => {
+const DataTable = forwardRef(({ data, setData }, ref) => {
 	useImperativeHandle(ref, () => ({
 		handleSave: handleSave,
 		AddButton: AddButton
 	}))
 	const AddButton = () => {
 		return (
-			<Button
-				onClick={handleSave}
-				type="primary"
-				style={{
-					marginBottom: 16,
-				}}
-			>
+			<Button onClick={handleSave} type="primary" style={{ marginBottom: 16,}}>
 				Add a row
 			</Button>
 		)
 	}
-	const [data, setData] = useState([]);
+	// const [data, setData] = useState([]);
 	useEffect(() => {
 		async function fetchData() {
-			const allData = await getAllValues();
-			if (allData) {
-				const data = []
-				for (let i = 0; i < allData.length; i++) {
-					data.push({
-						key: i,
-						abbr: allData[i][0],
-						url: allData[i][1],
-					});
-				}
-				setData(data)
-			}
+			let data = await getAllData()
+			setData(data)
 		}
 
 		fetchData()
@@ -86,9 +40,6 @@ const DataTable = forwardRef(({}, ref) => {
 	const isEditing = (record) => record.key === editingKey;
 	const edit = (record) => {
 		form.setFieldsValue({
-			name: '',
-			age: '',
-			address: '',
 			...record,
 		});
 		setEditingKey(record.key);
@@ -103,7 +54,6 @@ const DataTable = forwardRef(({}, ref) => {
 			const index = newData.findIndex((item) => key === item.key);
 			if (index > -1) {
 				const item = newData[index];
-				console.log("item", item)
 				newData.splice(index, 1, {
 					...item,
 					...row,
@@ -121,6 +71,7 @@ const DataTable = forwardRef(({}, ref) => {
 				let saveArray = [newDatum.abbr, newDatum.url]
 				saveData.push(saveArray)
 			}
+			setData(newData)
 			await chromeStorageSyncSet(saveData).then(
 				message.info("保存成功！", 3000)
 			)
@@ -138,6 +89,7 @@ const DataTable = forwardRef(({}, ref) => {
 				let saveArray = [newDatum.abbr, newDatum.url]
 				saveData.push(saveArray)
 			}
+			setData(newData)
 			await chromeStorageSyncSet(saveData).then(
 				message.info("删除成功！", 3000)
 			)
@@ -219,8 +171,38 @@ const DataTable = forwardRef(({}, ref) => {
 	);
 });
 
+const EditableCell = ({
+	                      editing,
+	                      dataIndex,
+	                      title,
+	                      inputType,
+	                      record,
+	                      index,
+	                      children,
+	                      ...restProps
+                      }) => {
+	const inputNode = inputType === 'number' ? <InputNumber/> : <Input/>;
+	return (
+		<td {...restProps}>
+			{editing ? (
+				<Form.Item name={dataIndex}
+				           rules={[
+					           {
+						           required: true,
+						           message: `Please Input ${title}!`,
+					           },
+				           ]}
+				>
+					{inputNode}
+				</Form.Item>
+			) : (
+				children
+			)}
+		</td>
+	);
+};
 
-const AddPopup = () => {
+const AddPopup = ({data, setData}) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [url, setUrl] = useState()
 	const [abbr, setAbbr] = useState()
@@ -228,13 +210,15 @@ const AddPopup = () => {
 	const showModal = () => {
 		setIsModalOpen(true);
 	};
-	const handleOk = () => {
+	const handleOk = async () => {
 		setIsModalOpen(false);
-		saveAbbrUrl(abbr, url).then(
+		await saveAbbrUrl(abbr, url).then(
 			message.info("新增成功！")
 		)
 		setUrl(null)
 		setAbbr(null)
+		let data = await getAllData()
+		setData(data)
 	};
 	const handleCancel = () => {
 		setIsModalOpen(false);

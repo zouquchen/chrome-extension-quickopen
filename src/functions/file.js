@@ -30,7 +30,21 @@ export const saveAbbrUrl = async(abbr, url) => {
  */
 export const getAllValues = async() => {
   let data = await chrome.storage.sync.get('quickOpen')
+  if (Object.keys(data).length === 0) {
+    await initData()
+    data = await chrome.storage.sync.get('quickOpen')
+  }
   return data.quickOpen
+}
+
+/**
+ * 初始化数据
+ */
+export const initData = async() => {
+  const newPair = ["git", "https://github.com/zouquchen/chrome-extension-quickopen"]
+  let data = []
+  data.push(newPair)
+  await chromeStorageSyncSet(data)
 }
 
 /**
@@ -85,17 +99,17 @@ const buildNewValues = async(abbr, url) => {
  */
 export const chromeStorageSyncSet = async(data) => {
   await chrome.storage.sync.set({'quickOpen' : data}).then(() => {
-    console.log("value is set")
+
   })
 }
 
 /**
- * 清楚已有配置
+ * 清除已有配置
  */
 export const clearStore = () => {
   let data = {'quickOpen' : []}
   chrome.storage.sync.set(data).then(() => {
-    console.log("clear success")
+
   })
 }
 
